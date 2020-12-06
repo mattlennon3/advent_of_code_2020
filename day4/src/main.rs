@@ -2,30 +2,39 @@ use std::fs;
 use std::io;
 use std::io::prelude::*;
 
-use regex::Regex;
-
-#[macro_use]
-extern crate lazy_static;
-
 #[derive(Debug, Clone)]
 struct Passport {
     /** (Birth Year) */
-    byr: String, 
+    byr: Option<String>, 
     /** (Issue Year) */
-    iyr: String, 
+    iyr: Option<String>, 
     /** (Expiration Year) */
-    eyr: String, 
+    eyr: Option<String>, 
     /** (Height) */
-    hgt: String, 
+    hgt: Option<String>, 
     /** (Hair Color) */
-    hcl: String, 
+    hcl: Option<String>, 
     /** (Eye Color) */
-    ecl: String, 
+    ecl: Option<String>, 
     /** (Passport ID) */
-    pid: String, 
+    pid: Option<String>, 
     /** (Country ID) */
-    cid: String, 
+    cid: Option<String>, 
+}
 
+impl Passport {
+    fn empty() -> Passport {
+        Passport {
+            byr: None,
+            iyr: None, 
+            eyr: None, 
+            hgt: None, 
+            hcl: None, 
+            ecl: None, 
+            pid: None, 
+            cid: None
+        }
+    }
 }
 
 // impl PartialEq for Passport {
@@ -41,21 +50,37 @@ struct Passport {
 fn main() {
     let file_string = fs::read_to_string("input.txt").expect("error");
     
-    lazy_static! {
-        static ref DOUBLE_NEWLINE : Regex = Regex::new(
-                r"\n\n"
-            ).unwrap();
-    }
 
-    let a: String = DOUBLE_NEWLINE.split(file_string.as_str())
+    let valid_quantity: u32 = file_string.split("\n\n")
         .map(|line| line.replace("\n", ""))
-        .map(|line| {
-            println!("{}", line);
-            line
-        }).collect();
+        .map(|line| parse_passport(line))
+        .collect::<Vec<Passport>>()
+        .len() as u32;
 }
 
 
-// fn parse_passport(input ) -> Passport {
+fn parse_passport(input: String ) -> Passport {
+    let data = input.split(' ');
+    let passport: Passport = Passport::empty();
 
-// }
+    for entry in data {
+        let a: Vec<&str> = entry.split(":").collect();
+        let (key, value) = (a[0], a[1]);
+
+
+        match key {
+            "byr" => passport.byr = Some(value.to_string()),
+            "iyr" => passport.iyr = Some(value.to_string()),
+            "eyr" => passport.eyr = Some(value.to_string()),
+            "hgt" => passport.hgt = Some(value.to_string()),
+            "hcl" => passport.hcl = Some(value.to_string()),
+            "ecl" => passport.ecl = Some(value.to_string()),
+            "pid" => passport.pid = Some(value.to_string()),
+            "cid" => passport.cid = Some(value.to_string()),
+            _ => panic!()            
+        }
+
+    }
+
+    passport
+}
