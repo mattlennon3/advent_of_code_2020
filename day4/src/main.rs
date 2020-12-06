@@ -2,6 +2,11 @@ use std::fs;
 use std::io;
 use std::io::prelude::*;
 
+use regex::Regex;
+
+#[macro_use]
+extern crate lazy_static;
+
 #[derive(Debug, Clone)]
 struct Passport {
     /** (Birth Year) */
@@ -34,27 +39,20 @@ struct Passport {
 // }
 
 fn main() {
-    let file = fs::File::open("input.txt").expect("No input found");
-    let mut lines = io::BufReader::new(file).lines();
-
-    let mut passport_details: Vec<&str> = vec![];
-
-    loop {
-        match lines.next().unwrap() {
-            Ok(text) => {
-                if text == "" {
-
-                } else {
-                    let mut individual_details: Vec<&str> = text.split_whitespace().collect().to_owned();
-                    passport_details.append(&mut individual_details);
-                }
-            },
-            Err(e) => panic!(e)
-        }
-        
+    let file_string = fs::read_to_string("input.txt").expect("error");
+    
+    lazy_static! {
+        static ref DOUBLE_NEWLINE : Regex = Regex::new(
+                r"\n\n"
+            ).unwrap();
     }
 
-
+    let a: String = DOUBLE_NEWLINE.split(file_string.as_str())
+        .map(|line| line.replace("\n", ""))
+        .map(|line| {
+            println!("{}", line);
+            line
+        }).collect();
 }
 
 
